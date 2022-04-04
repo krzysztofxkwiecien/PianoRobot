@@ -1,7 +1,21 @@
+#include <SD.h>
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+
+#define CS_PIN 10
+
+File textFile;
+struct SONG{
+  byte length{};
+  byte melodic_lines{};
+};
+String file_name = "music.txt";
+SONG song;
+byte convertNotes(String note);
+
+byte** score = nullptr;
 
 #define SERVO_FREQ 50
 #define SERVO_COUNT 2
@@ -20,20 +34,19 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define B_NOTE 2
 #define C_NOTE 3
 
-int noteToServoID[NOTES_COUNT];
-int noteToServoPosition[NOTES_COUNT];
+byte noteToServoID[NOTES_COUNT];
+short noteToServoPosition[NOTES_COUNT];
 
 // Song
-int noteLength = 150;
-int notes[] = {G_NOTE, A_NOTE, C_NOTE, A_NOTE, G_NOTE, B_NOTE, A_NOTE, A_NOTE};
-int durations[] = {1, 1, 1, 1, 1, 1, 1, 1};
-const int noteCount = 8;
-int currentNote = 0;
+short noteLength = 150;
+short currentNote = 0;
 
 void setup() {
 
-  for(int note = 0; note < NOTES_COUNT; note++){
-    noteToServoID[note] = (int)(note / 2);
+  sd_setup();
+
+  for(byte note = 0; note < NOTES_COUNT; note++){
+    noteToServoID[note] = (byte)(note / 2);
     noteToServoPosition[note] = (note % 2 == 0) ? LEFT : RIGHT;
   }
   
@@ -50,22 +63,30 @@ void loop() {
 //    turnServo(i, MIDDLE);
 //  }
 
-  playNote(notes[currentNote], durations[currentNote]);
+  playScore(currentNote);
 
-  if(++currentNote == noteCount)
+  if(++currentNote == song.length)
     currentNote = 0;
 }
 
-void playNote(int note, int duration){
-  playSimpleNote(note);
-  delay(noteLength * duration);
+void playScore(short index){
+  for(byte note; note < song.melodic_lines; note++){
+    if(note == 1)
+      clearNote(note);
+    if(note != 0)
+      playNote(note);
+  }
+  delay(noteLength);
+}
+
+void clearNote(byte note){
   turnServo(noteToServoID[note], MIDDLE);
 }
 
-void playSimpleNote(int note){
+void playNote(byte note){
   turnServo(noteToServoID[note], noteToServoPosition[note]);
 }
 
-void turnServo(int servoID, int position){
+void turnServo(byte servoID, short position){
   pwm.setPWM(servoID, 0, position);
 }
