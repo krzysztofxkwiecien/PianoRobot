@@ -7,7 +7,7 @@ struct SONG{
   byte length{};
   byte melodic_lines{};
 };
-String file_name = "wokwi.txt";
+String file_name = "music.txt";
 SONG song;
 byte convertNotes(String note);
 
@@ -96,10 +96,7 @@ void setup() {
     else{
       if(successor.indexOf('+') >= 0){
         // 1. zagraj dźwięk
-        // 2. zostaw
         score[music_line][pos] = convertNotes(actual_note);
-        score[music_line][pos+1] = 0;
-        pos += 1;
       }
       else{
         // 1. zagraj dźwięk
