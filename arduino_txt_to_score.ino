@@ -7,7 +7,7 @@ struct SONG{
   byte length{};
   byte melodic_lines{};
 };
-String file_name = "music.txt";
+String file_name = "wokwi.txt";
 SONG song;
 byte convertNotes(String note);
 
@@ -67,7 +67,7 @@ void setup() {
 
   for(byte music_line = 0; music_line < song.melodic_lines; music_line++){
     byte token_pos = 0;
-  for(byte pos = 0; pos < 2*song.length; pos+=2){
+  for(byte pos = 0; pos < 2*song.length; pos+=1){
     String predecessor = "";
     String actual_note = "";
     String successor = "";
@@ -82,19 +82,16 @@ void setup() {
         // 2. wroc do pozycji neutralnej       -  1 = "BackToNetural"
         score[music_line][pos] = 0;
         score[music_line][pos+1] = 1;
+        pos += 1;
       }
       else{
         // 1. trzymaj ostatni dzwiek
-        // 2. trzymaj ostatni dzwiek
         score[music_line][pos] = 0;
-        score[music_line][pos+1] = 0;
       }
     }
     else if(actual_note.indexOf("_") >= 0){
       //1. Pozycja neutralna
-      //2. Pozycja neutralna
       score[music_line][pos] = 1;
-      score[music_line][pos+1] = 0;
     }
     else{
       if(successor.indexOf('+') >= 0){
@@ -102,15 +99,15 @@ void setup() {
         // 2. zostaw
         score[music_line][pos] = convertNotes(actual_note);
         score[music_line][pos+1] = 0;
+        pos += 1;
       }
       else{
         // 1. zagraj dźwięk
-        // 2. wróc do pozycji neutralnej
         score[music_line][pos] = convertNotes(actual_note);
-        score[music_line][pos+1] = 1;
       }
     }
-    token_pos += 1;
+    if(token_pos < song.length-1)token_pos += 1;
+    else break;
   }
   }
 
