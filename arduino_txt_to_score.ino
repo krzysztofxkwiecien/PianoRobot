@@ -1,4 +1,21 @@
-void sd_setup() {
+#include <SD.h>
+
+#define CS_PIN 10
+
+File textFile;
+byte song_length{};
+byte song_melodic_lines{};
+char *file_name = "music.txt";
+byte**score = nullptr;
+
+byte convertNotes(String note);
+void setup();
+void loop();
+void add_to_array(byte music_line, String actual_note, byte pos);
+byte convertNotes(String note);
+byte** getScore(){ return score; };
+
+void setup() {
   Serial.begin(115200);
   if (!SD.begin(CS_PIN)) {
     Serial.println("Card initialization failed!");
@@ -14,82 +31,64 @@ void sd_setup() {
         if(sign == '\n') break;
         line.concat(sign);
       }
-      if(i==0) song.melodic_lines = line.toInt();
-      else song.length = line.toInt();
+      if(i==0) song_melodic_lines = line.toInt();
+      else song_length = line.toInt();
     }
   }
 
-  score = new byte*[song.melodic_lines]; // create a music score container
-  for(byte i = 0; i < song.melodic_lines; ++i)
-    score[i] = new byte[2*song.length]; // create a music score container
+  score = new byte*[song_melodic_lines]; // create a music score container
+  for(byte i = 0; i < song_melodic_lines; ++i)
+    score[i] = new byte[song_length]; // fill a music score container
 
-  String tokens[song.melodic_lines][song.length];
-
-  if (textFile) {                   // read score parameters (musi być spacja na końcu linii melodycznej w pliku)
-    String line = "";
+  
+  if (textFile) {   // read score parameters (musi być spacja na końcu linii melodycznej w pliku)
+    byte pos=0;                
+    String token = "";
     byte melodic_line = 0;
-    byte pos = 0;
-    byte to_much_space = 0;
+
     while (textFile.available()) {
       char sign = textFile.read();
       if(sign == '\n') {
         melodic_line++;
         pos = 0;
+        Serial.println();
       }
-      else if(sign == ' ' && line != "") {
-        tokens[melodic_line][pos] = line;
+      else if(sign == ' ' && token != "") {
+        Serial.print(token + " ");
+        add_to_array(melodic_line, token, pos);
+        token = "";
         pos += 1;
-        line = "";
       }
-      else if(sign != ' ') line.concat(sign);
-      
+      else if(sign != ' ') token.concat(sign);
     }
     textFile.close();
   }
+  Serial.println();
 
-  for(byte music_line = 0; music_line < song.melodic_lines; music_line++){
-    byte token_pos = 0;
-  for(byte pos = 0; pos < 2*song.length; pos+=1){
-    String predecessor = "";
-    String actual_note = "";
-    String successor = "";
-
-    if(token_pos > 0) predecessor = tokens[music_line][token_pos-1];
-    actual_note = tokens[music_line][token_pos];
-    if(token_pos + 1 < song.length) successor = tokens[music_line][token_pos+1];
-
-    if(actual_note.indexOf('+') >= 0) { // SERVO - do nothing, keep the note played (write double 0 to score array)
-      if(successor.indexOf('+') == -1){
-        // 1. trzymaj ostatni dzwiek           -  0 = "KeepLast - do nothing"
-        // 2. wroc do pozycji neutralnej       -  1 = "BackToNetural"
-        score[music_line][pos] = 0;
-        score[music_line][pos+1] = 1;
-        pos += 1;
-      }
-      else{
-        // 1. trzymaj ostatni dzwiek
-        score[music_line][pos] = 0;
-      }
-    }
-    else if(actual_note.indexOf("_") >= 0){
-      //1. Pozycja neutralna
-      score[music_line][pos] = 1;
-    }
-    else{
-      if(successor.indexOf('+') >= 0){
-        // 1. zagraj dźwięk
-        score[music_line][pos] = convertNotes(actual_note);
-      }
-      else{
-        // 1. zagraj dźwięk
-        score[music_line][pos] = convertNotes(actual_note);
-      }
-    }
-    if(token_pos < song.length-1)token_pos += 1;
-    else break;
+  byte** score3 = getScore();
+  
+  for(byte i=0; i<song_melodic_lines; i++){
+  for(byte j=0; j<song_length; j++){
+    Serial.print(score3[i][j]);
+    Serial.print(" ");
   }
+  Serial.println();
   }
+}
 
+void add_to_array(byte music_line, String actual_note, byte pos){
+  if(actual_note.indexOf('+') >= 0) { 
+    // trzymaj ostatni dzwiek
+    score[music_line][pos] = 0;
+  }
+  else if(actual_note.indexOf("_") >= 0){
+    // Pozycja neutralna
+    score[music_line][pos] = 1;
+  }
+  else{
+    // zagraj dźwięk
+    score[music_line][pos] = convertNotes(actual_note);
+  }
 }
 
 byte convertNotes(String note){
@@ -130,4 +129,9 @@ byte convertNotes(String note){
   else if(note == "h5") return 36;
   else if(note == "c6") return 37;
   else return 0;
+}
+
+
+void loop() {
+  // nothing happens after setup finishes.
 }
