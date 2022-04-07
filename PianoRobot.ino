@@ -7,14 +7,9 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define CS_PIN 10
 
 File textFile;
-struct SONG{
-  byte length{};
-  byte melodic_lines{};
-};
+byte song_length;
+byte song_melodic_lines;
 String file_name = "music.txt";
-SONG song;
-byte convertNotes(String note);
-
 byte** score = nullptr;
 
 #define SERVO_FREQ 50
@@ -65,12 +60,12 @@ void loop() {
 
   playScore(currentNote);
 
-  if(++currentNote == song.length)
+  if(++currentNote == song_length)
     currentNote = 0;
 }
 
 void playScore(short index){
-  for(byte note; note < song.melodic_lines; note++){
+  for(byte note; note < song_melodic_lines; note++){
     if(note == 1)
       clearNote(note);
     if(note != 0)

@@ -1,21 +1,9 @@
-#include <SD.h>
-
-#define CS_PIN 10
-
-File textFile;
-byte song_length{};
-byte song_melodic_lines{};
-char *file_name = "music.txt";
-byte**score = nullptr;
-
 byte convertNotes(String note);
-void setup();
-void loop();
 void add_to_array(byte music_line, String actual_note, byte pos);
 byte convertNotes(String note);
 byte** getScore(){ return score; };
 
-void setup() {
+void sd_setup() {
   Serial.begin(115200);
   if (!SD.begin(CS_PIN)) {
     Serial.println("Card initialization failed!");
@@ -129,9 +117,4 @@ byte convertNotes(String note){
   else if(note == "h5") return 36;
   else if(note == "c6") return 37;
   else return 0;
-}
-
-
-void loop() {
-  // nothing happens after setup finishes.
 }
