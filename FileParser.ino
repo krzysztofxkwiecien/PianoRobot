@@ -3,6 +3,22 @@
 File textFile;
 String fileName = "music.txt";
 
+/*****************
+  # FILE STRUCTURE
+//////////////////
+1. No. of melodic lines
+2. No. of notes in a line
+3. BPM of the song
+Each next line represents a melodic line, which consists of
+notes separated by space. Also, + means holding the previous note
+and _ means playing no note. Example:
+2
+12
+120
+a2  a2  _   _  c2  +   +   a2  c2  +   _   _
+d4  c4  a4  +  _   d4  c4  a4  +   _   d4  a4
+*****************/
+
 void readFromSD() {
 
   if (!SD.begin(CS_PIN)) {
@@ -33,7 +49,7 @@ void readSongParameters() {
     else if (i == 1)
       songLength = line.toInt();
     else
-      noteLength = line.toInt();
+      noteLength = 1000 * (60 / line.toInt());
   }
 }
 

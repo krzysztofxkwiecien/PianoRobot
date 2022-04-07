@@ -32,7 +32,7 @@ short noteToServoPosition[SERVO_COUNT * 2];
 byte songLength;
 byte songLines;
 byte** score = nullptr;
-short noteLength = 150;
+short noteLength;
 
 // Iterator
 short currentNote = 0;
