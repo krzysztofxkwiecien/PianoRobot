@@ -21,16 +21,31 @@ d4  c4  a4  +  _   d4  c4  a4  +   _   d4  a4
 
 void readFromSD() {
 
+  Serial.println("Begin parsing! **********");
+
   if (!SD.begin(CS_PIN)) {
-    // ???
+    Serial.println("initialization failed!");
     while (true);
   }
 
-  File textFile = SD.open(fileName);
+  textFile = SD.open(fileName);
 
   readSongParameters();
   initializeArray();
   readSong();
+
+  Serial.println("Done parsing! **********");
+
+  Serial.println(songLength);
+  Serial.println(songLines);
+  Serial.println(noteLength);
+  for(int m = 0; m < songLines; m++){
+    for(int n = 0; n < songLength; n++){
+      Serial.print(score[m][n]);
+      Serial.print(" ");
+    }
+    Serial.print("\n");
+  }
 
   textFile.close();
 }
@@ -49,7 +64,7 @@ void readSongParameters() {
     else if (i == 1)
       songLength = line.toInt();
     else
-      noteLength = 1000 * (60 / line.toInt());
+      noteLength = floor((double)1000 * (double)60 / (double)line.toInt());
   }
 }
 
