@@ -1,6 +1,5 @@
 #include <SPI.h>
-#include <SD.h>
-#include <Wire.h>
+#include <SD.h> 
 #include <Adafruit_PWMServoDriver.h>
 
 Adafruit_PWMServoDriver pwmDriver = Adafruit_PWMServoDriver();
@@ -9,7 +8,7 @@ Adafruit_PWMServoDriver pwmDriver = Adafruit_PWMServoDriver();
   # DEV OPTIONS
 *****************/
 #define DEV_MODE 0 // Set 0 to disable all dev options
-#define CALIBRATION_MODE 0 // Hold all servos in the MIDDLE position (for mounting)
+#define CALIBRATION_MODE 1 // Hold all servos in the MIDDLE position (for mounting)
 #define STEP_MODE 0 // Step though the song with button presses instead of auto-playing
 
 #define STEP_BUTTON_PIN 8
@@ -24,7 +23,7 @@ Adafruit_PWMServoDriver pwmDriver = Adafruit_PWMServoDriver();
 #define LEFT 450
 #define MIDDLE 325
 #define RIGHT 200
-#define SERVO_COUNT 3
+#define SERVO_COUNT 16
 
 byte noteToServoID[SERVO_COUNT * 2];
 short noteToServoPosition[SERVO_COUNT * 2];
@@ -54,9 +53,11 @@ void setup() {
   pwmDriver.begin();
   pwmDriver.setOscillatorFrequency(OSC_FREQ);
   pwmDriver.setPWMFreq(PWM_FREQ);
-  for (int i = 0; i < SERVO_COUNT; i++)
+  for (int i = 0; i < SERVO_COUNT; i++){
     turnServo(i, MIDDLE);
-
+    delay(50);
+  }
+    
   Serial.println("Setup complete!");
 
   delay(1000);
@@ -70,7 +71,10 @@ void loop() {
   if (DEV_MODE && CALIBRATION_MODE) {
     for (int i = 0; i < SERVO_COUNT; i++) {
       turnServo(i, MIDDLE);
+      delay(50);
     }
+    delay(1000);
+    return;
   }
 
   playScore(currentNote);
@@ -128,6 +132,9 @@ void playNote(byte note) {
 }
 
 void turnServo(byte servoID, short position) {
-  Serial.println(servoID);
+  Serial.print("Turn servo ");
+  Serial.print(servoID);
+  Serial.print(" to ");
+  Serial.println(position);
   pwmDriver.setPWM(servoID, 0, position);
 }
