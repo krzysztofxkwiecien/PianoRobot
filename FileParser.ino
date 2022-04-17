@@ -21,10 +21,10 @@ d4  c4  a4  +  _   d4  c4  a4  +   _   d4  a4
 
 void readFromSD() {
 
-  Serial.println("Begin parsing! **********");
+  //Serial.println("Begin parsing! **********");
 
   if (!SD.begin(CS_PIN)) {
-    Serial.println("initialization failed!");
+    //Serial.println("initialization failed!");
     while (true);
   }
 
@@ -34,17 +34,17 @@ void readFromSD() {
   initializeArray();
   readSong();
 
-  Serial.println("Done parsing! **********");
+  //Serial.println("Done parsing! **********");
 
-  Serial.println(songLength);
-  Serial.println(songLines);
-  Serial.println(noteLength);
+  //Serial.println(songLength);
+  //Serial.println(songLines);
+  //Serial.println(noteLength);
   for(int m = 0; m < songLines; m++){
     for(int n = 0; n < songLength; n++){
-      Serial.print(score[m][n]);
-      Serial.print(" ");
+      //Serial.print(score[m][n]);
+      //Serial.print(" ");
     }
-    Serial.print("\n");
+    //Serial.print("\n");
   }
 
   textFile.close();
@@ -83,6 +83,7 @@ void readSong() {
     char c = textFile.read();
     if (c == '\n') {
       melodicLine++;
+      token = "";
       pos = 0;
     }
     else if (c == ' ' && token != "") {
@@ -99,7 +100,7 @@ void addToArray(byte melodicLine, String actuaNote, byte pos) {
   if (actuaNote.indexOf('+') >= 0)
     score[melodicLine][pos] = NOTE_HOLD;
   else if (actuaNote.indexOf("_") >= 0)
-    score[melodicLine][pos] = NOTE_CLEAR;
+    score[melodicLine][pos] = NOTE_NONE;
   else
     score[melodicLine][pos] = convertNote(actuaNote);
 }

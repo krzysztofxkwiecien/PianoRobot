@@ -1,5 +1,5 @@
 #include <SPI.h>
-#include <SD.h> 
+#include <SD.h>
 #include <Adafruit_PWMServoDriver.h>
 
 Adafruit_PWMServoDriver pwmDriver = Adafruit_PWMServoDriver();
@@ -14,7 +14,7 @@ Adafruit_PWMServoDriver pwmDriver = Adafruit_PWMServoDriver();
 #define STEP_BUTTON_PIN 8
 //////////////////
 
-#define NOTE_CLEAR 255
+#define NOTE_NONE 255
 #define NOTE_HOLD 254
 
 // Servo config
@@ -39,11 +39,10 @@ short currentNote = 0;
 
 void setup() {
 
-  Serial.begin(115200);
-  Serial.println("I'm alive!");
+  //Serial.begin(115200);
+  //Serial.println("Start");
 
   readFromSD();
-
 
   for (byte note = 0; note < SERVO_COUNT * 2; note++) {
     noteToServoID[note] = (byte)(note / 2);
@@ -53,12 +52,12 @@ void setup() {
   pwmDriver.begin();
   pwmDriver.setOscillatorFrequency(OSC_FREQ);
   pwmDriver.setPWMFreq(PWM_FREQ);
-  for (int i = 0; i < SERVO_COUNT; i++){
+  for (byte i = 0; i < SERVO_COUNT; i++) {
     turnServo(i, MIDDLE);
-    delay(50);
+    delay(100);
   }
-    
-  Serial.println("Setup complete!");
+
+  //Serial.println("Setup complete!");
 
   delay(1000);
 }
@@ -66,12 +65,12 @@ void setup() {
 
 void loop() {
 
-  Serial.println("Loop!");
+  //Serial.println("Loop --------------");
 
   if (DEV_MODE && CALIBRATION_MODE) {
-    for (int i = 0; i < SERVO_COUNT; i++) {
+    for (byte i = 0; i < SERVO_COUNT; i++) {
       turnServo(i, MIDDLE);
-      delay(50);
+      delay(100);
     }
     delay(1000);
     return;
@@ -87,54 +86,53 @@ void loop() {
 
   if (++currentNote == songLength)
     currentNote = 0;
-
 }
 
 void playScore(short index) {
 
-  if (index > 0) {
-    for (byte line = 0; line < songLines; line++) {
-      if (!(score[line][index] == NOTE_HOLD)) {
-        byte clearIndex = index - 1;
-        while (score[line][clearIndex] == NOTE_HOLD) {
-          clearIndex--;
-        }
-        Serial.print("Clear ");
-        Serial.println(score[line][clearIndex]);
-        clearNote(score[line][clearIndex]);
+
+  for (byte line = 0; line < songLines; line++) {
+    if (!(score[line][index] == NOTE_HOLD)) {
+      byte clearIndex;
+      if (index != 0)
+        clearIndex = index - 1;
+      else
+        clearIndex = songLength - 1;
+      while (score[line][clearIndex] == NOTE_HOLD) {
+        clearIndex--;
       }
+      //Serial.print("Clear note ");
+      //Serial.println(score[line][clearIndex]);
+      clearNote(score[line][clearIndex]);
     }
   }
+  delay(noteLength);
 
 
-
-  Serial.println("Cleared");
+  //Serial.println("Cleared");
   for (byte line = 0; line < songLines; line++) {
-    Serial.print("Time for note ");
-    Serial.println(score[line][index]);
-    if (score[line][index] == NOTE_HOLD) {
-      byte s = 0;
-    }
-    else
+    //Serial.print("Time for note ");
+    //Serial.println(score[line][index]);
+    if (!(score[line][index] == NOTE_HOLD))
       playNote(score[line][index]);
   }
   delay(noteLength);
 }
 
 void clearNote(byte note) {
-  if (note < 200)
+  if (note != NOTE_NONE)
     turnServo(noteToServoID[note], MIDDLE);
 }
 
 void playNote(byte note) {
-  if (note < 200)
+  if (note != NOTE_NONE)
     turnServo(noteToServoID[note], noteToServoPosition[note]);
 }
 
 void turnServo(byte servoID, short position) {
-  Serial.print("Turn servo ");
-  Serial.print(servoID);
-  Serial.print(" to ");
-  Serial.println(position);
+  //Serial.print("Turn servo ");
+  //Serial.print(servoID);
+  //Serial.print(" to ");
+  //Serial.println(position);
   pwmDriver.setPWM(servoID, 0, position);
 }
