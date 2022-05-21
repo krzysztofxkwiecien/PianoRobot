@@ -51,7 +51,7 @@ void readFromSD() {
 }
 
 void readSongParameters() {
-  for (byte i = 0; i < 3; i++) {
+  for (byte i = 0; i < 2; i++) {
     String line = "";
     while (textFile.available()) {
       char c = textFile.read();
@@ -61,14 +61,28 @@ void readSongParameters() {
     }
     if (i == 0)
       songLines = line.toInt();
-    else if (i == 1)
-      songLength = line.toInt();
     else
       noteLength = floor((double)1000 * (double)60 / (double)line.toInt());
   }
 }
 
 void initializeArray(){
+  int file_pos = textFile.position();
+  String token = "";
+  while (textFile.available()) {
+    char c = textFile.read();
+    if (c == '\n')
+      break;
+    else if (c == ' ' && token != "") {
+      token = "";
+      songLength += 1;
+    }
+    else if (c != ' ')
+      token.concat(c);
+  }
+  songLength += 1;
+  textFile.seek(file_pos);
+
   score = new byte*[songLines];
   for (byte i = 0; i < songLines; i++)
     score[i] = new byte[songLength];
