@@ -51,23 +51,21 @@ void readFromSD() {
 }
 
 void readSongParameters() {
-  for (byte i = 0; i < 2; i++) {
-    String line = "";
-    while (textFile.available()) {
-      char c = textFile.read();
-      if (c == '\n')
-        break;
-      line.concat(c);
-    }
-    if (i == 0)
-      songLines = line.toInt();
-    else
-      noteLength = floor((double)1000 * (double)60 / (double)line.toInt());
+  String line = "";
+  while (textFile.available()) {;
+    char c = textFile.read();
+    if (c == '\n')
+      break;
+    line.concat(c);
   }
+  noteLength = floor((double)1000 * (double)60 / (double)line.toInt());
+
+  inferLineSize();
+  inferLineCount();
 }
 
-void initializeArray(){
-  int file_pos = textFile.position();
+void inferLineSize(){
+  unsigned long file_pos = textFile.position();
   String token = "";
   while (textFile.available()) {
     char c = textFile.read();
@@ -80,9 +78,20 @@ void initializeArray(){
     else if (c != ' ')
       token.concat(c);
   }
-  songLength += 1;
-  textFile.seek(file_pos);
+  textFile.seek(file_pos - 1);
+}
 
+void inferLineCount(){
+  unsigned long file_pos = textFile.position();
+  while (textFile.available()) {
+    char c = textFile.read();
+    if (c == '\n')
+      songLines++;
+  }
+  textFile.seek(file_pos+1);
+}
+
+void initializeArray(){
   score = new byte*[songLines];
   for (byte i = 0; i < songLines; i++)
     score[i] = new byte[songLength];
@@ -92,7 +101,6 @@ void readSong() {
   byte pos = 0;
   String token = "";
   byte melodicLine = 0;
-
   while (textFile.available()) {
     char c = textFile.read();
     if (c == '\n') {

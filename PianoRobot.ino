@@ -39,8 +39,8 @@ short currentNote = 0;
 
 void setup() {
 
-  //Serial.begin(115200);
-  //Serial.println("Start");
+  Serial.begin(115200);
+  Serial.println("Start");
 
   readFromSD();
 
